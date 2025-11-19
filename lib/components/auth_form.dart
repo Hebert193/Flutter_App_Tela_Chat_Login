@@ -1,5 +1,7 @@
 //customizacao dos campos
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_app_chat/components/user_image_picker.dart';
 import 'package:flutter_application_app_chat/models/auth_form_data.dart';
 
 class AuthForm extends StatefulWidget {
@@ -15,12 +17,30 @@ class _AuthFormState extends State<AuthForm> {
   final _formKey = GlobalKey<FormState>(); // acessando dados do formulário
   final _formData = AuthFormData(); // usando a classe que foi criada
 
+  void _handleImagePick(File image) {
+    _formData.image = image;
+  }
+
+  void _showErro(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
+  }
+
   void _submit() {
     final isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) return;
     // _formKey.currentState?.validate();
-    widget.onSubmit(_formData);
-  }
+
+  if (_formData.image == null && _formData.isSignup) {
+      return _showErro( 'Imagem não selecionada');
+    }
+
+  widget.onSubmit(_formData);
+}
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +53,9 @@ class _AuthFormState extends State<AuthForm> {
           child: Column(
             children: [
               if (_formData.isSignup)
+                UserImagePicker(
+                  onimagePick: _handleImagePick,
+                ),
                 TextFormField(
                   key: const ValueKey('name'),
                   initialValue: _formData.name,
